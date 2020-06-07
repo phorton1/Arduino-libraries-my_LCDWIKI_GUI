@@ -20,7 +20,7 @@
 #define WITH_ILI9431_FONTS   1
 
 #if WITH_ILI9431_FONTS
-	#include <IL9341_prhFontType.h>
+	#include <ILI9341_t3.h>
 #endif
 
 

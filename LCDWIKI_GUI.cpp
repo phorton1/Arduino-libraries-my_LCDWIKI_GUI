@@ -22,7 +22,10 @@ MIT License
 #include "LCDWIKI_font.c"
 #include "LCDWIKI_GUI.h"
 
-#define swap(a, b) { int16_t t = a; a = b; b = t; }
+#ifndef WITH_ILI9431_FONTS
+	// prh - already defined in Paul's stuff
+	#define swap(a, b) { int16_t t = a; a = b; b = t; }
+#endif
 
 //Constructor to set text color 
 LCDWIKI_GUI::LCDWIKI_GUI(void)
