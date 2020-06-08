@@ -109,8 +109,28 @@ class LCDWIKI_GUI : public Print
 		void setDefaultFont(void) { font = NULL; }
 	#endif
 	
+	// prh additions
 	
-	protected:
+	int getFontHeight();
+	int getTextExtent(const char *text);
+	
+	#define LCD_JUST_LEFT    0
+	#define LCD_JUST_CENTER  1 
+	#define LCD_JUST_RIGHT   2
+	
+	void printf_justified(
+		int x,
+		int y,
+		int w,
+		int h,
+		int just,
+		uint16_t fc,			// calls Set_Text_colour
+		uint16_t bc,			// draws the rectangle for you if font*
+		const char *format,
+		...);
+	
+	
+protected:
 
 	int16_t text_x, text_y;
 	uint16_t text_color, text_bgcolor,draw_color;

@@ -857,6 +857,7 @@ size_t LCDWIKI_GUI::write(uint8_t c)
 
 
 #if WITH_ILI9431_FONTS
+	#include <myDebug.h>
 
 	static uint32_t fetchbit(const uint8_t *p, uint32_t index)
 	{
@@ -1103,6 +1104,128 @@ size_t LCDWIKI_GUI::write(uint8_t c)
 #endif	// WITH_ILI9431_FONTS
 
 
+// #define LCD_JUST_LEFT    0
+// #define LCD_JUST_CENTER  1 
+// #define LCD_JUST_RIGHT   2
+
+int LCDWIKI_GUI::getFontHeight()
+{
+	#if WITH_ILI9431_FONTS
+		if (font)
+			return font->line_space;
+	#endif
+	
+	return text_size * 8;
+}
+
+int LCDWIKI_GUI::getTextExtent(const char *text)
+{
+	int len = strlen(text);
+
+	#if WITH_ILI9431_FONTS
+		if (font)
+		{
+			int strlen = 0;
+			for (int i=0; i<len; i++)
+			{
+				unsigned int c = text[i];
+				uint32_t bitoffset;
+				if (c >= font->index1_first && c <= font->index1_last)
+				{
+					bitoffset = c - font->index1_first;
+					bitoffset *= font->bits_index;
+				}
+				else if (c >= font->index2_first && c <= font->index2_last)
+				{
+					bitoffset = c - font->index2_first + font->index1_last - font->index1_first + 1;
+					bitoffset *= font->bits_index;
+				}
+				else
+				{
+					warning(0,"WARNING: chr(%d)=%c cannot be mapped",c,c);
+					continue;
+				}
+
+				const uint8_t *data = font->data + fetchbits_unsigned(font->index, bitoffset, font->bits_index);
+				uint32_t encoding = fetchbits_unsigned(data, 0, 3);
+				if (encoding != 0)
+				{
+					warning(0,"WARNING: chr(%d)=%c bad encoding(%d)",c,c,encoding);
+					continue;
+				}
+
+				bitoffset = font->bits_width + 3;
+				bitoffset += font->bits_height;
+				bitoffset += font->bits_xoffset;
+				bitoffset += font->bits_yoffset;
+				
+				uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
+				
+				display(0,"width(%c)=%d",c,delta);
+				
+				strlen += (int) delta;				
+			}
+			return strlen;
+		}
+	#endif
+	
+	return len * text_size * 6;
+}
+
+
+#define MAX_PRINTF_STRING  255
+
+
+void LCDWIKI_GUI::printf_justified(
+	int x,
+	int y,
+	int w,
+	int h,
+	int just,
+	uint16_t fc,			// calls Set_Text_colour
+	uint16_t bc,			// draws the rectangle for you if font*
+	const char *format,
+	...)
+{
+	unsigned char display_buffer[MAX_PRINTF_STRING+1];
+	
+	va_list var;
+	va_start(var, format);
+        
+	// allows for 2 times expansion, but no telling it may just crash
+	
+	if (strlen(format) >= MAX_PRINTF_STRING/2)
+	{
+		my_error("error - MAX_PRINTF_STRING overflow",0);
+		return;
+	}
+    
+	vsprintf((char *)display_buffer,format,var);
+
+	#if WITH_ILI9431_FONTS
+		// draw the background rectangle
+		// some characters (S) are drawn one pixel above the 1 position
+		if (font)
+			Fill_Rect(x,y-1,w,h+1,bc);
+		else
+	#endif	
+		Set_Text_Back_colour(bc);
+		
+	if (just != LCD_JUST_LEFT)
+	{
+		int width = getTextExtent((char *)display_buffer);
+		
+		int xoffset = (w - width);
+		if (xoffset < 0) xoffset = 0;
+		if (just == LCD_JUST_CENTER)
+			xoffset /= 2;
+			
+		x += xoffset;
+	}
+	
+	Set_Text_colour(fc);
+	Print_String(display_buffer,x,y);
+}
 
 
 
