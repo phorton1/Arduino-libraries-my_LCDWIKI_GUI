@@ -1160,9 +1160,6 @@ int LCDWIKI_GUI::getTextExtent(const char *text)
 				bitoffset += font->bits_yoffset;
 				
 				uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
-				
-				display(0,"width(%c)=%d",c,delta);
-				
 				strlen += (int) delta;				
 			}
 			return strlen;
