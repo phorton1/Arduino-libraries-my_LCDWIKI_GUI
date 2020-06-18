@@ -113,6 +113,7 @@ class LCDWIKI_GUI : public Print
 	
 	int getFontHeight();
 	int getTextExtent(const char *text);
+	void drawBorderedRectangle(int x, int y, int w, int h, int b, int color);
 	
 	#define LCD_JUST_LEFT    0
 	#define LCD_JUST_CENTER  1 

@@ -1226,17 +1226,13 @@ void LCDWIKI_GUI::printf_justified(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+void LCDWIKI_GUI:drawBorderedRectangle(int x, int y, int w, int h, int b, int color)
+{
+	Fill_Rect(x,		y,		b,		h,	color);
+	Fill_Rect(x+w-b,	y,		b,		h,	color);
+	Fill_Rect(x,		y,		w,		b,	color);
+	Fill_Rect(x,		y+h-b,	w,		b,	color);
+}
 
 
 
