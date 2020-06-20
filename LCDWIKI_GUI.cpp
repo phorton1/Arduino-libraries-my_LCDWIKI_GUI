@@ -1214,6 +1214,8 @@ void LCDWIKI_GUI::printf_justified(
 		
 		int xoffset = (w - width);
 		if (xoffset < 0) xoffset = 0;
+		// right justification is not working
+		// getTextExtent is returning something too small
 		if (just == LCD_JUST_CENTER)
 			xoffset /= 2;
 			
