@@ -17,7 +17,10 @@
 #endif
 
 
-#define WITH_ILI9431_FONTS   1
+// prh addition WITH_ILI9431_FONTS
+// added ability to use fonts from Paul's ILI9431_t3 library
+
+#define WITH_ILI9431_FONTS   1		
 
 #if WITH_ILI9431_FONTS
 	#include <ILI9341_t3.h>
@@ -74,7 +77,7 @@ class LCDWIKI_GUI : public Print
 	void Set_Text_Cursor(int16_t x, int16_t y);
 	int16_t Get_Text_X_Cursor(void) const;
 	int16_t Get_Text_Y_Cursor(void) const;
-		// prh think this is a mispelling of "cursor"
+		// prh fixed mispelling of "cursor"
 		
 	void Set_Text_colour(uint16_t color);
 	void Set_Text_colour(uint8_t r, uint8_t g, uint8_t b);
@@ -87,8 +90,18 @@ class LCDWIKI_GUI : public Print
 	void Set_Text_Size(uint8_t s);
 	uint8_t Get_Text_Size(void) const;
 	
-	void Set_Text_Mode(boolean mode);
-	boolean Get_Text_Mode(void) const;
+	
+	// prh - changes
+	// void Set_Text_Mode(boolean mode);
+	// boolean Get_Text_Mode(void) const;
+	void setTextBackgroundOn(boolean on) 	{ m_use_bc = on; }
+	boolean getTextBackgroundOn() 			{ return m_use_bc; }
+		// prh - this whole "text_mode" thing is backwards and obtruse
+		// it was only used in Draw_Char()
+		//   IFF the background color != the font color ??!?!
+		//   to "not" draw the background if set.
+		//
+		
 	
 	size_t Print(uint8_t *st, int16_t x, int16_t y);
 	void Print_String(const uint8_t *st, int16_t x, int16_t y);
@@ -103,17 +116,17 @@ class LCDWIKI_GUI : public Print
 	int16_t Get_Display_Height(void) const; 
 	
 	size_t write(uint8_t c);
+	
+	// prh additions
 
 	#if WITH_ILI9431_FONTS
 		void setFont(const ILI9341_t3_font_t &f) { font = &f; }
 		void setDefaultFont(void) { font = NULL; }
 	#endif
 	
-	// prh additions
-	
 	int getFontHeight();
 	int getTextExtent(const char *text);
-	void drawBorderedRectangle(int x, int y, int w, int h, int b, int color);
+	void drawBorder(int x, int y, int w, int h, int b, int color);
 	
 	#define LCD_JUST_LEFT    0
 	#define LCD_JUST_CENTER  1 
@@ -127,24 +140,27 @@ class LCDWIKI_GUI : public Print
 		int just,
 		uint16_t fc,			// calls Set_Text_colour
 		uint16_t bc,			// draws the rectangle for you if font*
+		bool use_bc,
 		const char *format,
 		...);
 	
+	// end prh additions
 	
 protected:
 
 	int16_t text_x, text_y;
 	uint16_t text_color, text_bgcolor,draw_color;
 	uint8_t text_size;
-	boolean text_mode; //if set,text_bgcolor is invalid
+	
+	// prh - boolean text_mode became use_bc
+	boolean m_use_bc;
+		// if set, text_bgcolor is not used when writing characters
+		// otherwise, it is.
 
-	#if WITH_ILI9431_FONTS
+	#if WITH_ILI9431_FONTS	// prh addition
 		const ILI9341_t3_font_t *font;
-		
 		void drawFontChar(unsigned int c);
 		void drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat);
-	
-	
 	#endif	
 };
 
