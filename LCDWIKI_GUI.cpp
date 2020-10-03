@@ -22,29 +22,26 @@ MIT License
 #include "LCDWIKI_font.c"
 #include "LCDWIKI_GUI.h"
 
-#ifndef WITH_ILI9431_FONTS
-	// prh - already defined in Paul's stuff
-	#define swap(a, b) { int16_t t = a; a = b; b = t; }
-#endif
+#define swap(a, b) { int16_t t = a; a = b; b = t; }
 
 
-//Constructor to set text color 
+//Constructor to set text color
 LCDWIKI_GUI::LCDWIKI_GUI(void)
 {
 	text_bgcolor = 0xF800; //default red
 	text_color = 0x07E0; //default green
 	draw_color = 0xF800; //default red
 	text_size = 1;
-	
+
 	// prh - removed stupid text_mode concept
 	m_use_bc = true;
-	
+
 	// text_mode = 0;	// by default, text is drawn with background color
-	
+
 	#if WITH_ILI9431_FONTS
 		font = 0;
-	#endif	
-	
+	#endif
+
 }
 
 //set 16bits draw color
@@ -83,20 +80,20 @@ uint16_t LCDWIKI_GUI::Read_Pixel(int16_t x, int16_t y)
 void LCDWIKI_GUI::Fill_Rectangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 {
 	int w = x2 - x1 + 1, h = y2 - y1 + 1;
-   	if (w < 0) 
-	{ 
-		x1 = x2; 
-		w = -w; 
+   	if (w < 0)
+	{
+		x1 = x2;
+		w = -w;
 	}
-	if (h < 0) 
-	{ 
-		y1 = y2; 
-		h = -h; 
+	if (h < 0)
+	{
+		y1 = y2;
+		h = -h;
 	}
 	Fill_Rect(x1, y1, w, h, draw_color);
 }
 
-//draw a vertical line 
+//draw a vertical line
 void LCDWIKI_GUI::Draw_Fast_VLine(int16_t x, int16_t y, int16_t h)
 {
 	Fill_Rect(x, y, 1, h, draw_color);
@@ -125,17 +122,17 @@ void LCDWIKI_GUI::Fill_Screen(uint8_t r, uint8_t g, uint8_t b)
 void LCDWIKI_GUI::Draw_Line(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 {
 	int16_t steep = abs(y2 - y1) > abs(x2 - x1);
-  	if (steep) 
+  	if (steep)
 	{
     	swap(x1, y1);
     	swap(x2, y2);
 	}
-	if (x1 > x2) 
+	if (x1 > x2)
 	{
     	swap(x1, x2);
     	swap(y1, y2);
   	}
-	
+
   	int16_t dx, dy;
   	dx = x2 - x1;
   	dy = abs(y2 - y1);
@@ -143,27 +140,27 @@ void LCDWIKI_GUI::Draw_Line(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 	int16_t err = dx / 2;
 	int16_t ystep;
 
-	if (y1 < y2) 
+	if (y1 < y2)
 	{
     	ystep = 1;
-  	} 
-	else 
+  	}
+	else
 	{
     	ystep = -1;
 	}
 
-	for (; x1<=x2; x1++) 
+	for (; x1<=x2; x1++)
 	{
-    	if (steep) 
+    	if (steep)
 		{
       		Draw_Pixel(y1, x1);
-    	} 
-		else 
+    	}
+		else
 		{
       		Draw_Pixel(x1, y1);
     	}
     	err -= dy;
-    	if (err < 0) 
+    	if (err < 0)
 		{
 			y1 += ystep;
 			err += dx;
@@ -173,17 +170,17 @@ void LCDWIKI_GUI::Draw_Line(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 
 //draw a rectangle
 void LCDWIKI_GUI::Draw_Rectangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
-{ 
+{
 	int16_t w = x2 - x1 + 1, h = y2 - y1 + 1;
-	if (w < 0) 
-	{ 
-		x1 = x2; 
-		w = -w; 
+	if (w < 0)
+	{
+		x1 = x2;
+		w = -w;
 	}
-	if (h < 0) 
-	{ 
-		y1 = y2; 
-		h = -h; 
+	if (h < 0)
+	{
+		y1 = y2;
+		h = -h;
 	}
 	Draw_Fast_HLine(x1, y1, w);
   	Draw_Fast_HLine(x1, y2, w);
@@ -195,19 +192,19 @@ void LCDWIKI_GUI::Draw_Rectangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 void LCDWIKI_GUI::Draw_Round_Rectangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t radius)
 {
 	int w = x2 - x1 + 1, h = y2 - y1 + 1;
-	if (w < 0) 
-	{ 
-		x1 = x2; 
-		w = -w; 
+	if (w < 0)
+	{
+		x1 = x2;
+		w = -w;
 	}
- 	if (h < 0) 
-	{ 
-		y1 = y2; 
-		h = -h; 
+ 	if (h < 0)
+	{
+		y1 = y2;
+		h = -h;
 	}
-	Draw_Fast_HLine(x1+radius, y1, w-2*radius); 
-	Draw_Fast_HLine(x1+radius, y1+h-1, w-2*radius); 
-	Draw_Fast_VLine(x1, y1+radius, h-2*radius); 
+	Draw_Fast_HLine(x1+radius, y1, w-2*radius);
+	Draw_Fast_HLine(x1+radius, y1+h-1, w-2*radius);
+	Draw_Fast_VLine(x1, y1+radius, h-2*radius);
   	Draw_Fast_VLine(x1+w-1, y1+radius, h-2*radius);
 	Draw_Circle_Helper(x1+radius, y1+radius, radius, 1);
 	Draw_Circle_Helper(x1+w-radius-1, y1+radius, radius, 2);
@@ -219,19 +216,19 @@ void LCDWIKI_GUI::Draw_Round_Rectangle(int16_t x1, int16_t y1, int16_t x2, int16
 void LCDWIKI_GUI::Fill_Round_Rectangle(int16_t x1, int16_t y1, int16_t x2,int16_t y2, int16_t radius)
 {
 	int w = x2 - x1 + 1, h = y2 - y1 + 1;
-	if (w < 0) 
-	{ 
-		x1 = x2; 
-		w = -w; 
+	if (w < 0)
+	{
+		x1 = x2;
+		w = -w;
 	}
-	if (h < 0) 
-	{ 
-		y1 = y2; 
-		h = -h; 
+	if (h < 0)
+	{
+		y1 = y2;
+		h = -h;
 	}
 	Fill_Rect(x1+radius, y1, w-2*radius, h, draw_color);
 	Fill_Circle_Helper(x1+w-radius-1, y1+radius, radius, 1, h-2*radius-1);
-	Fill_Circle_Helper(x1+radius, y1+radius, radius, 2, h-2*radius-1);	
+	Fill_Circle_Helper(x1+radius, y1+radius, radius, 2, h-2*radius-1);
 }
 
 //draw a circle
@@ -248,9 +245,9 @@ void LCDWIKI_GUI::Draw_Circle(int16_t x, int16_t y, int16_t radius)
 	Draw_Pixel(x+radius, y);
 	Draw_Pixel(x-radius, y);
 
-	while (x1<y1) 
+	while (x1<y1)
 	{
-    	if (f >= 0) 
+    	if (f >= 0)
 		{
       		y1--;
       		ddF_y += 2;
@@ -259,7 +256,7 @@ void LCDWIKI_GUI::Draw_Circle(int16_t x, int16_t y, int16_t radius)
     	x1++;
     	ddF_x += 2;
     	f += ddF_x;
-  
+
 		Draw_Pixel(x + x1, y + y1);
     	Draw_Pixel(x - x1, y + y1);
 		Draw_Pixel(x + x1, y - y1);
@@ -279,9 +276,9 @@ void LCDWIKI_GUI::Draw_Circle_Helper(int16_t x0, int16_t y0, int16_t radius, uin
 	int16_t ddF_y = -2 * radius;
 	int16_t x     = 0;
 	int16_t y     = radius;
-	while (x<y) 
+	while (x<y)
 	{
-    	if (f >= 0) 
+    	if (f >= 0)
 		{
       		y--;
       		ddF_y += 2;
@@ -290,17 +287,17 @@ void LCDWIKI_GUI::Draw_Circle_Helper(int16_t x0, int16_t y0, int16_t radius, uin
 	    x++;
 	    ddF_x += 2;
 	    f += ddF_x;
-	    if (cornername & 0x4) 
+	    if (cornername & 0x4)
 		{
 			Draw_Pixel(x0 + x, y0 + y);
 			Draw_Pixel(x0 + y, y0 + x);
-	    } 
-	    if (cornername & 0x2) 
+	    }
+	    if (cornername & 0x2)
 		{
 			Draw_Pixel(x0 + x, y0 - y);
 			Draw_Pixel(x0 + y, y0 - x);
 	    }
-	    if (cornername & 0x8) 
+	    if (cornername & 0x8)
 		{
 			Draw_Pixel(x0 - y, y0 + x);
 			Draw_Pixel(x0 - x, y0 + y);
@@ -329,9 +326,9 @@ void LCDWIKI_GUI::Fill_Circle_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t 
 	int16_t x     = 0;
 	int16_t y     = r;
 
-	while (x<y) 
+	while (x<y)
 	{
-    	if (f >= 0) 
+    	if (f >= 0)
 		{
       		y--;
       		ddF_y += 2;
@@ -341,12 +338,12 @@ void LCDWIKI_GUI::Fill_Circle_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t 
     	ddF_x += 2;
     	f += ddF_x;
 
-    	if (cornername & 0x1) 
+    	if (cornername & 0x1)
 		{
       		Draw_Fast_VLine(x0+x, y0-y, 2*y+1+delta);
       		Draw_Fast_VLine(x0+y, y0-x, 2*x+1+delta);
     	}
-    	if (cornername & 0x2) 
+    	if (cornername & 0x2)
 		{
       		Draw_Fast_VLine(x0-x, y0-y, 2*y+1+delta);
       		Draw_Fast_VLine(x0-y, y0-x, 2*x+1+delta);
@@ -366,24 +363,24 @@ void LCDWIKI_GUI::Draw_Triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,i
 void LCDWIKI_GUI::Fill_Triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 {
 	int16_t a, b, y, last;
-  	if (y0 > y1) 
+  	if (y0 > y1)
 	{
-    	swap(y0, y1); 
+    	swap(y0, y1);
 		swap(x0, x1);
   	}
-  	if (y1 > y2) 
+  	if (y1 > y2)
 	{
-    	swap(y2, y1); 
+    	swap(y2, y1);
 		swap(x2, x1);
   	}
-  	if (y0 > y1) 
+  	if (y0 > y1)
 	{
-    	swap(y0, y1); 
+    	swap(y0, y1);
 		swap(x0, x1);
   	}
 
-	if(y0 == y2) 
-	{ 
+	if(y0 == y2)
+	{
     	a = b = x0;
     	if(x1 < a)
     	{
@@ -408,14 +405,14 @@ void LCDWIKI_GUI::Fill_Triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,i
 	int32_t sa = 0, sb = 0;
 	if(y1 == y2)
 	{
-		last = y1; 
+		last = y1;
 	}
   	else
   	{
-		last = y1-1; 
+		last = y1-1;
   	}
 
-  	for(y=y0; y<=last; y++) 
+  	for(y=y0; y<=last; y++)
 	{
     	a   = x0 + sa / dy01;
     	b   = x0 + sb / dy02;
@@ -429,7 +426,7 @@ void LCDWIKI_GUI::Fill_Triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,i
 	}
 	sa = dx12 * (y - y1);
 	sb = dx02 * (y - y0);
-	for(; y<=y2; y++) 
+	for(; y<=y2; y++)
 	{
     	a   = x1 + sa / dy12;
     	b   = x0 + sb / dy02;
@@ -462,17 +459,17 @@ void LCDWIKI_GUI::Fill_Triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,i
 void LCDWIKI_GUI::Draw_Bit_Map(int16_t x, int16_t y, int16_t sx, int16_t sy, const uint16_t *data, int16_t scale)
 {
 	int16_t color;
-	Set_Addr_Window(x, y, x + sx*scale - 1, y + sy*scale - 1); 
+	Set_Addr_Window(x, y, x + sx*scale - 1, y + sy*scale - 1);
 	if(1 == scale)
 	{
 
 		Push_Any_Color((uint16_t *)data, sx * sy, 1, 0);
 	}
-	else 
+	else
 	{
-		for (int16_t row = 0; row < sy; row++) 
+		for (int16_t row = 0; row < sy; row++)
 		{
-			for (int16_t col = 0; col < sx; col++) 
+			for (int16_t col = 0; col < sx; col++)
 			{
 				color = *(data + (row*sx + col)*1);//pgm_read_word(data + (row*sx + col)*1);
 				Fill_Rect(x+col*scale, y+row*scale, scale, scale, color);
@@ -521,7 +518,7 @@ uint16_t LCDWIKI_GUI::Get_Text_colour(void) const
 //set text background colour with 16bits color
 void LCDWIKI_GUI::Set_Text_Back_colour(uint16_t color)
 {
-	text_bgcolor = color;	
+	text_bgcolor = color;
 }
 
 //set text background colour with 8bits r,g,b
@@ -554,7 +551,7 @@ uint8_t LCDWIKI_GUI::Get_Text_Size(void) const
 // {
 // 	text_mode = mode;
 // }
-// 
+//
 // boolean LCDWIKI_GUI::Get_Text_Mode(void) const
 // {
 // 	return text_mode;
@@ -583,12 +580,12 @@ void LCDWIKI_GUI::Draw_Char(
 	if((x >= Get_Width()) || (y >= Get_Height()) || ((x + 6 * size - 1) < 0) || ((y + 8 * size - 1) < 0))
 	{
     	return;
-	}		
+	}
   	if(c >= 176) // prh huh?
   	{
-		c++; 
+		c++;
   	}
-	
+
 	for (int8_t i=0; i<6; i++) 		// for each column
 	{
     	uint8_t line;
@@ -600,42 +597,42 @@ void LCDWIKI_GUI::Draw_Char(
     	{
       		line = pgm_read_byte(lcd_font+(c*5)+i);
     	}
-		
+
     	for (int8_t j = 0; j<8; j++) 	// for each row
 		{
-      		if (line & 0x1) 
+      		if (line & 0x1)
 			{
         		if (size == 1)
         		{
         			Draw_Pixe(x+i, y+j, color);
         		}
-        		else 
-				{  
+        		else
+				{
 					Fill_Rect(x+(i*size), y+(j*size), size, size, color);
         		}
-        	} 
-		
-			
+        	}
+
+
 			// prh and got rid of this weird if
-			// else if (bg != color) 				
+			// else if (bg != color)
 			// {
 			//	   if (!mode)
 			//	   {
-			
+
 			else if (use_bc)
 			{
-				if (size == 1) 
+				if (size == 1)
 				{
 					Draw_Pixe(x+i, y+j, bg);
 				}
-				else 
-				{  
+				else
+				{
 					Fill_Rect(x+i*size, y+j*size, size, size, bg);
 				}
 			}
-			
+
 			// }
-			
+
       		line >>= 1;
     	}
     }
@@ -648,10 +645,10 @@ size_t LCDWIKI_GUI::Print(uint8_t *st, int16_t x, int16_t y)
 	uint16_t len;
 	const char * p = (const char *)st;
 	size_t n = 0;
-	if (x == CENTER || x == RIGHT) 
+	if (x == CENTER || x == RIGHT)
 	{
-		len = strlen((const char *)st) * 6 * text_size;		
-		pos = (Get_Display_Width() - len); 
+		len = strlen((const char *)st) * 6 * text_size;
+		pos = (Get_Display_Width() - len);
 		if (x == CENTER)
 		{
 			x = pos/2;
@@ -677,7 +674,7 @@ size_t LCDWIKI_GUI::Print(uint8_t *st, int16_t x, int16_t y)
 		{
 			break;
 		}
-	}	
+	}
 	return n;
 }
 
@@ -718,7 +715,7 @@ void LCDWIKI_GUI::Print_Number_Int(long num, int16_t x, int16_t y, int16_t lengt
 		{
 			num = -num;
 			flag = true;
-		}		
+		}
 	}
 	while((num > 0) && (len < 10))
 	{
@@ -752,7 +749,7 @@ void LCDWIKI_GUI::Print_Number_Int(long num, int16_t x, int16_t y, int16_t lengt
 			*(--p) = filler;
 		}
 		left_len = sizeof(st) - nlen - len - flag - 1;
-	}	
+	}
 	else
 	{
 		left_len = sizeof(st) - len - flag - 1;
@@ -794,7 +791,7 @@ void LCDWIKI_GUI::Print_Number_Float(double num, uint8_t dec, int16_t x, int16_t
 				*(p+i) = divider;
 			}
 			i++;
-		}	
+		}
 	}
 	if(filler != ' ')
 	{
@@ -830,7 +827,7 @@ void LCDWIKI_GUI::Print_Number_Float(double num, uint8_t dec, int16_t x, int16_t
 
 
 //write a char
-size_t LCDWIKI_GUI::write(uint8_t c) 
+size_t LCDWIKI_GUI::write(uint8_t c)
 {
 	#if WITH_ILI9431_FONTS
 		if (font)
@@ -850,21 +847,21 @@ size_t LCDWIKI_GUI::write(uint8_t c)
 			return 1;
 		}
 	#endif
-	
-	if (c == '\n') 
+
+	if (c == '\n')
 	{
     	text_y += text_size*8;
     	text_x  = 0;
- 	} 
+ 	}
 	else if(c == '\r')
 	{
 	}
-	else 
+	else
 	{
     	Draw_Char(text_x, text_y, c, text_color, text_bgcolor, text_size,m_use_bc);		// prh text_mode);
-    	text_x += text_size*6;		
-    }	
-  	return 1;	
+    	text_x += text_size*6;
+    }
+  	return 1;
 }
 
 
@@ -876,7 +873,7 @@ int16_t LCDWIKI_GUI::Get_Display_Width(void) const
 	return Get_Width();
 }
 
-//get lcd height 
+//get lcd height
 int16_t LCDWIKI_GUI::Get_Display_Height(void) const
 {
 	return Get_Height();
