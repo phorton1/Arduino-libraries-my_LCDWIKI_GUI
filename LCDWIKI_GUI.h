@@ -32,9 +32,13 @@
 //#include <avr/dtostrf.h>
 //#endif
 
-#define LEFT 0
-#define RIGHT 9999
-#define CENTER 9998
+
+// #define LCD_JUST_LEFT    0
+// #define LCD_JUST_CENTER  1
+// #define LCD_JUST_RIGHT   2
+
+
+
 
 class LCDWIKI_GUI : public Print
 {
@@ -125,6 +129,8 @@ class LCDWIKI_GUI : public Print
 	#endif
 
 	int getFontHeight();
+	int getCharWidth(unsigned int c);
+
 	int getTextExtent(const char *text);
 	void drawBorder(int x, int y, int w, int h, int b, int color);
 
@@ -163,7 +169,7 @@ class LCDWIKI_GUI : public Print
 		uint16_t fc,
 		uint16_t bc,
 		bool use_bc,
-		char *text);
+		const char *text);
 
 	// end prh additions
 

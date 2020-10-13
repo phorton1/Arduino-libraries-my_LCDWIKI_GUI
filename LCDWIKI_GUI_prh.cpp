@@ -32,7 +32,7 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 		if (p[index >> 3] & (1 << (7 - (index & 7)))) return 1;
 		return 0;
 	}
-	
+
 	static uint32_t fetchbits_unsigned(const uint8_t *p, uint32_t index, uint32_t required)
 	{
 		uint32_t val = 0;
@@ -53,7 +53,7 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 		} while (required);
 		return val;
 	}
-	
+
 	static uint32_t fetchbits_signed(const uint8_t *p, uint32_t index, uint32_t required)
 	{
 		uint32_t val = fetchbits_unsigned(p, index, required);
@@ -68,9 +68,9 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 	{
 		uint32_t bitoffset;
 		const uint8_t *data;
-	
+
 		//Serial.printf("drawFontChar %d\n", c);
-	
+
 		if (c >= font->index1_first && c <= font->index1_last)
 		{
 			bitoffset = c - font->index1_first;
@@ -89,31 +89,31 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 		{
 			return;
 		}
-		
+
 		//Serial.printf("  index =  %d\n", fetchbits_unsigned(font->index, bitoffset, font->bits_index));
-		
+
 		data = font->data + fetchbits_unsigned(font->index, bitoffset, font->bits_index);
 		uint32_t encoding = fetchbits_unsigned(data, 0, 3);
 		if (encoding != 0) return;
-		
+
 		uint32_t width = fetchbits_unsigned(data, 3, font->bits_width);
 		bitoffset = font->bits_width + 3;
 		uint32_t height = fetchbits_unsigned(data, bitoffset, font->bits_height);
 		bitoffset += font->bits_height;
 		//Serial.printf("  size =   %d,%d\n", width, height);
-	
+
 		int32_t xoffset = fetchbits_signed(data, bitoffset, font->bits_xoffset);
 		bitoffset += font->bits_xoffset;
 		int32_t yoffset = fetchbits_signed(data, bitoffset, font->bits_yoffset);
 		bitoffset += font->bits_yoffset;
 		//Serial.printf("  offset = %d,%d\n", xoffset, yoffset);
-	
+
 		uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
 		bitoffset += font->bits_delta;
 		//Serial.printf("  delta =  %d\n", delta);
-	
+
 		//Serial.printf("  cursor = %d,%d\n", cursor_x, cursor_y);
-	
+
 		// horizontally, we draw every pixel, or none at all
 		if (text_x < 0) text_x = 0;
 		int32_t origin_x = text_x + xoffset;
@@ -125,7 +125,7 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 		if (origin_x + (int)width > Get_Width())
 		{
 			// if (!wrap) return;  prh - wrap
-			
+
 			origin_x = 0;
 			if (xoffset >= 0) {
 				text_x = 0;
@@ -136,11 +136,11 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 		}
 		if (text_y >= Get_Height()) return;
 		text_x += delta;
-	
+
 		// vertically, the top and/or bottom can be clipped
 		int32_t origin_y = text_y + font->cap_height - height - yoffset;
 		//Serial.printf("  origin = %d,%d\n", origin_x, origin_y);
-	
+
 		// TODO: compute top skip and number of lines
 		int32_t linecount = height;
 		//uint32_t loopcount = 0;
@@ -189,12 +189,12 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 			//}
 		}
 	}
-	
-	
-	
+
+
+
 	void LCDWIKI_GUI::drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat)
 	{
-		#if 1			
+		#if 1
 			// TODO: replace this *slow* code with something fast...
 			//Serial.printf("      %d bits at %d,%d: %X\n", numbits, x, y, bits);
 			if (bits == 0) return;
@@ -215,21 +215,21 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 				repeat--;
 			} while (repeat);
 		#endif
-		
-		
-		
+
+
+
 		#if 0
 			if (bits == 0) return;
 			beginSPITransaction();
 			int w = 0;
 			do {
 				uint32_t x1 = x;
-				uint32_t n = numbits;		
-				
+				uint32_t n = numbits;
+
 				writecommand_cont(ILI9341_PASET); // Row addr set
 				writedata16_cont(y);   // YSTART
-				writedata16_cont(y);   // YEND	
-				
+				writedata16_cont(y);   // YEND
+
 				do {
 					n--;
 					if (bits & (1 << n)) {
@@ -239,34 +239,34 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 						// "drawFastHLine(x1 - w, y, w, textcolor)"
 						writecommand_cont(ILI9341_CASET); // Column addr set
 						writedata16_cont(x1 - w);   // XSTART
-						writedata16_cont(x1);   // XEND					
+						writedata16_cont(x1);   // XEND
 						writecommand_cont(ILI9341_RAMWR);
 						while (w-- > 1) { // draw line
 							writedata16_cont(textcolor);
 						}
 						writedata16_last(textcolor);
 					}
-								
+
 					x1++;
 				} while (n > 0);
-		
+
 				if (w > 0) {
 						// "drawFastHLine(x1 - w, y, w, textcolor)"
 						writecommand_cont(ILI9341_CASET); // Column addr set
 						writedata16_cont(x1 - w);   // XSTART
 						writedata16_cont(x1);   // XEND
-						writecommand_cont(ILI9341_RAMWR);				
+						writecommand_cont(ILI9341_RAMWR);
 						while (w-- > 1) { //draw line
 							writedata16_cont(textcolor);
 						}
 						writedata16_last(textcolor);
 				}
-				
+
 				y++;
 				repeat--;
 			} while (repeat);
 			endSPITransaction();
-		#endif	
+		#endif
 	}
 
 #endif	// WITH_ILI9431_FONTS
@@ -274,7 +274,7 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 
 
 //------------------------------------------
-// text extents 
+// text extents
 //-----------------------------------------
 
 
@@ -284,9 +284,54 @@ int LCDWIKI_GUI::getFontHeight()
 		if (font)
 			return font->line_space;
 	#endif
-	
+
 	return text_size * 8;
 }
+
+
+int LCDWIKI_GUI::getCharWidth(unsigned int c)
+{
+	#if WITH_ILI9431_FONTS
+		if (font)
+		{
+			uint32_t bitoffset;
+			if (c >= font->index1_first && c <= font->index1_last)
+			{
+				bitoffset = c - font->index1_first;
+				bitoffset *= font->bits_index;
+			}
+			else if (c >= font->index2_first && c <= font->index2_last)
+			{
+				bitoffset = c - font->index2_first + font->index1_last - font->index1_first + 1;
+				bitoffset *= font->bits_index;
+			}
+			else
+			{
+				warning(0,"WARNING: chr(%d)=%c cannot be mapped",c,c);
+				return 0;
+			}
+
+			const uint8_t *data = font->data + fetchbits_unsigned(font->index, bitoffset, font->bits_index);
+			uint32_t encoding = fetchbits_unsigned(data, 0, 3);
+			if (encoding != 0)
+			{
+				warning(0,"WARNING: chr(%d)=%c bad encoding(%d)",c,c,encoding);
+				return 0;
+			}
+
+			bitoffset = font->bits_width + 3;
+			bitoffset += font->bits_height;
+			bitoffset += font->bits_xoffset;
+			bitoffset += font->bits_yoffset;
+
+			uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
+			return (int) delta;
+		}
+	#endif
+	return text_size * 6;
+}
+
+
 
 
 int LCDWIKI_GUI::getTextExtent(const char *text)
@@ -298,45 +343,11 @@ int LCDWIKI_GUI::getTextExtent(const char *text)
 		{
 			int strlen = 0;
 			for (int i=0; i<len; i++)
-			{
-				unsigned int c = text[i];
-				uint32_t bitoffset;
-				if (c >= font->index1_first && c <= font->index1_last)
-				{
-					bitoffset = c - font->index1_first;
-					bitoffset *= font->bits_index;
-				}
-				else if (c >= font->index2_first && c <= font->index2_last)
-				{
-					bitoffset = c - font->index2_first + font->index1_last - font->index1_first + 1;
-					bitoffset *= font->bits_index;
-				}
-				else
-				{
-					warning(0,"WARNING: chr(%d)=%c cannot be mapped",c,c);
-					continue;
-				}
-
-				const uint8_t *data = font->data + fetchbits_unsigned(font->index, bitoffset, font->bits_index);
-				uint32_t encoding = fetchbits_unsigned(data, 0, 3);
-				if (encoding != 0)
-				{
-					warning(0,"WARNING: chr(%d)=%c bad encoding(%d)",c,c,encoding);
-					continue;
-				}
-
-				bitoffset = font->bits_width + 3;
-				bitoffset += font->bits_height;
-				bitoffset += font->bits_xoffset;
-				bitoffset += font->bits_yoffset;
-				
-				uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
-				strlen += (int) delta;				
-			}
+				strlen += getCharWidth(text[i]);
 			return strlen;
 		}
 	#endif
-	
+
 	return len * text_size * 6;
 }
 
@@ -349,12 +360,6 @@ int LCDWIKI_GUI::getTextExtent(const char *text)
 // without clipping.  clears the entire bounding box if use_bc.
 
 
-// #define LCD_JUST_LEFT    0
-// #define LCD_JUST_CENTER  1 
-// #define LCD_JUST_RIGHT   2
-
-
-
 #define MAX_PRINTF_STRING  1024
 
 void LCDWIKI_GUI::printf_justified(
@@ -363,8 +368,8 @@ void LCDWIKI_GUI::printf_justified(
 	int w,
 	int h,
 	int just,
-	uint16_t fc,			
-	uint16_t bc,			
+	uint16_t fc,
+	uint16_t bc,
 	bool use_bc,
 	const char *format,
 	...)
@@ -381,8 +386,8 @@ void LCDWIKI_GUI::printfv_justified(
 	int w,
 	int h,
 	int just,
-	uint16_t fc,			
-	uint16_t bc,			
+	uint16_t fc,
+	uint16_t bc,
 	bool use_bc,
 	const char *format,
 	va_list args)
@@ -398,62 +403,75 @@ void LCDWIKI_GUI::printfv_justified(
 }
 
 
-	
+
+#define MAX_PRINT_LEN  255
+char print_j_buf[MAX_PRINT_LEN+1];
+
+
+
 void LCDWIKI_GUI::print_justified(
 	int x,
-	int y,
+	int start_y,
 	int w,
 	int h,
 	int just,
-	uint16_t fc,			
-	uint16_t bc,			
+	uint16_t fc,
+	uint16_t bc,
 	bool use_bc,
-	char *text)
+	const char *text)
 {
-
-	if (use_bc)
-		Fill_Rect(x,y-1,w,h+1,bc);
-		
-	// print it by lines
-
 	Set_Text_colour(fc);
+	if (use_bc)
+		Fill_Rect(x,start_y,w,h,bc);
+
+	const char *start = text;
+	int y = start_y + 1;
 	int yoffset = getFontHeight();
-	char *to_print = text;
-	char *end = to_print;
-	
-	while (*to_print)
+
+	while (*start && y+yoffset-1<start_y+h-1)
 	{
-		if (!*end || *end == '\n')
+		int len = 0;
+		int pixel_len = 0;
+
+		while (*start)
 		{
-			if (*end)
-				*end++ = 0;
-
-			// print a line
-			// getTextExtent is not really working correctly at this time.
-			// Right justify is definitely not working
-
-			int use_x = x;			
-			if (just != LCD_JUST_LEFT)
+			char c = *start;
+			if (c == 13)
 			{
-				int width = getTextExtent(to_print);
-				int xoffset = (w - width);
-				if (xoffset < 0) xoffset = 0;
-				if (just == LCD_JUST_CENTER)
-					xoffset /= 2;
-				use_x += xoffset;
+				start++;
+				break;
 			}
-			
-			Print_String(to_print,use_x,y);
-			
-			// next lne
-			y += yoffset;
-			to_print = end;
+			else if (len>=MAX_PRINT_LEN)
+			{
+				break;
+			}
+			else
+			{
+				int pix = getCharWidth(c);
+				if (pixel_len + pix > w)
+				{
+					break;
+				}
+
+				start++;
+				pixel_len += pix;
+				print_j_buf[len++] = c;
+			}
+		}	// while 1
+
+		print_j_buf[len++] = 0;
+
+		int use_x = x;
+		if (just != LCD_JUST_LEFT)
+		{
+			int xoffset = (w - pixel_len);
+			if (xoffset < 0) xoffset = 0;
+			if (just == LCD_JUST_CENTER)
+				xoffset /= 2;
+			use_x += xoffset;
 		}
-		else
-			end++;
+
+		Print_String(print_j_buf,use_x,y);
+		y += yoffset;
 	}
 }
-
-
-
-

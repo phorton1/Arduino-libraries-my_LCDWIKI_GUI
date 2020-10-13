@@ -638,6 +638,15 @@ void LCDWIKI_GUI::Draw_Char(
     }
 }
 
+
+// prh - talk about a weird amateur API
+// as well as polluting namespace ..
+// these constants are no longer effing public
+#define LEFT 0
+#define RIGHT 9999
+#define CENTER 9998
+
+
 //print string
 size_t LCDWIKI_GUI::Print(uint8_t *st, int16_t x, int16_t y)
 {
