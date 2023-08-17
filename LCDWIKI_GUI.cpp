@@ -153,10 +153,12 @@ void LCDWIKI_GUI::Draw_Line(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 	{
     	if (steep)
 		{
+			// Serial.printf("DrawPixel(%d,%d)\n",x1,y1);
       		Draw_Pixel(y1, x1);
     	}
 		else
 		{
+			// Serial.printf("DrawPixel(%d,%d)\n",x1,y1);
       		Draw_Pixel(x1, y1);
     	}
     	err -= dy;
@@ -165,6 +167,7 @@ void LCDWIKI_GUI::Draw_Line(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 			y1 += ystep;
 			err += dx;
     	}
+		// delay(20);
   	}
 }
 

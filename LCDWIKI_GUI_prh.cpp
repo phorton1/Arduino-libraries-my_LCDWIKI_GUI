@@ -64,12 +64,17 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 	}
 
 
+	#define DEBUG_DRAW_FONT_CHAR   0
+
+
 	void LCDWIKI_GUI::drawFontChar(unsigned int c)
 	{
 		uint32_t bitoffset;
 		const uint8_t *data;
 
-		//Serial.printf("drawFontChar %d\n", c);
+		#if DEBUG_DRAW_FONT_CHAR
+			Serial.printf("drawFontChar %d at x=%d y=%d\n", c,text_x,text_y);
+		#endif
 
 		if (c >= font->index1_first && c <= font->index1_last)
 		{
@@ -90,7 +95,9 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 			return;
 		}
 
-		//Serial.printf("  index =  %d\n", fetchbits_unsigned(font->index, bitoffset, font->bits_index));
+		#if DEBUG_DRAW_FONT_CHAR
+			Serial.printf("  index =  %d\n", fetchbits_unsigned(font->index, bitoffset, font->bits_index));
+		#endif
 
 		data = font->data + fetchbits_unsigned(font->index, bitoffset, font->bits_index);
 		uint32_t encoding = fetchbits_unsigned(data, 0, 3);
@@ -100,21 +107,29 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 		bitoffset = font->bits_width + 3;
 		uint32_t height = fetchbits_unsigned(data, bitoffset, font->bits_height);
 		bitoffset += font->bits_height;
-		//Serial.printf("  size =   %d,%d\n", width, height);
+
+		#if DEBUG_DRAW_FONT_CHAR
+			Serial.printf("  size =   %d,%d\n", width, height);
+		#endif
 
 		int32_t xoffset = fetchbits_signed(data, bitoffset, font->bits_xoffset);
 		bitoffset += font->bits_xoffset;
 		int32_t yoffset = fetchbits_signed(data, bitoffset, font->bits_yoffset);
 		bitoffset += font->bits_yoffset;
-		//Serial.printf("  offset = %d,%d\n", xoffset, yoffset);
+		#if DEBUG_DRAW_FONT_CHAR
+			Serial.printf("  offset = %d,%d\n", xoffset, yoffset);
+		#endif
 
 		uint32_t delta = fetchbits_unsigned(data, bitoffset, font->bits_delta);
 		bitoffset += font->bits_delta;
-		//Serial.printf("  delta =  %d\n", delta);
 
-		//Serial.printf("  cursor = %d,%d\n", cursor_x, cursor_y);
+		#if DEBUG_DRAW_FONT_CHAR
+			Serial.printf("  delta =  %d\n", delta);
+			// Serial.printf("  cursor = %d,%d\n", cursor_x, cursor_y);
+		#endif
 
 		// horizontally, we draw every pixel, or none at all
+
 		if (text_x < 0) text_x = 0;
 		int32_t origin_x = text_x + xoffset;
 		if (origin_x < 0)
@@ -139,7 +154,9 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 
 		// vertically, the top and/or bottom can be clipped
 		int32_t origin_y = text_y + font->cap_height - height - yoffset;
-		//Serial.printf("  origin = %d,%d\n", origin_x, origin_y);
+		#if DEBUG_DRAW_FONT_CHAR
+			Serial.printf("  origin = %d,%d\n", origin_x, origin_y);
+		#endif
 
 		// TODO: compute top skip and number of lines
 		int32_t linecount = height;
@@ -147,11 +164,17 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 		uint32_t y = origin_y;
 		while (linecount)
 		{
-			//Serial.printf("    linecount = %d\n", linecount);
+			#if DEBUG_DRAW_FONT_CHAR
+				Serial.printf("    linecount = %d\n", linecount);
+			#endif
+
 			uint32_t b = fetchbit(data, bitoffset++);
 			if (b == 0)
 			{
-				//Serial.println("    single line");
+				#if DEBUG_DRAW_FONT_CHAR
+					Serial.println("    single line");
+				#endif
+
 				uint32_t x = 0;
 				do
 				{
@@ -174,7 +197,9 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 				{
 					uint32_t xsize = width - x;
 					if (xsize > 32) xsize = 32;
-					//Serial.printf("    multi line %d\n", n);
+					#if DEBUG_DRAW_FONT_CHAR
+						Serial.printf("    multi line %d\n", n);
+					#endif
 					uint32_t bits = fetchbits_unsigned(data, bitoffset, xsize);
 					drawFontBits(bits, xsize, origin_x + x, y, n);
 					bitoffset += xsize;
@@ -207,7 +232,9 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 					if (bits & (1 << n))
 					{
 						Draw_Pixe(x1, y, text_color);
-						//Serial.printf("        pixel at %d,%d\n", x1, y);
+						#if DEBUG_DRAW_FONT_CHAR > 1
+							Serial.printf("        pixel at %d,%d\n", x1, y);
+						#endif
 					}
 					x1++;
 				} while (n > 0);
@@ -420,6 +447,10 @@ void LCDWIKI_GUI::print_justified(
 	bool use_bc,
 	const char *text)
 {
+	#if DEBUG_DRAW_FONT_CHAR
+		Serial.printf("print_justified(%d,%d,%d,%d,  %d, 0x%04x, 0x%04x, %d, \"%s\")\n", x, start_y,w,h,just,fc,bc,use_bc,text);
+	#endif
+
 	Set_Text_colour(fc);
 	if (use_bc)
 		Fill_Rect(x,start_y,w,h,bc);
@@ -428,7 +459,7 @@ void LCDWIKI_GUI::print_justified(
 	int y = start_y + 1;
 	int yoffset = getFontHeight();
 
-	while (*start && y+yoffset-1<start_y+h-1)
+	while (*start) // && y+yoffset-1<start_y+h-1)
 	{
 		int len = 0;
 		int pixel_len = 0;
@@ -450,7 +481,7 @@ void LCDWIKI_GUI::print_justified(
 				int pix = getCharWidth(c);
 				if (pixel_len + pix > w)
 				{
-					break;
+					// break;
 				}
 
 				start++;
