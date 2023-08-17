@@ -481,7 +481,7 @@ void LCDWIKI_GUI::print_justified(
 				int pix = getCharWidth(c);
 				if (pixel_len + pix > w)
 				{
-					// break;
+					break;
 				}
 
 				start++;
