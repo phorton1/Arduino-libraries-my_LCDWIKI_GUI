@@ -1,6 +1,6 @@
 #include "LCDWIKI_font.c"
 #include "LCDWIKI_GUI.h"
-
+#include <myDebug.h>
 
 // Miscellaneous
 
@@ -25,7 +25,7 @@ void LCDWIKI_GUI::drawBorder(int x, int y, int w, int h, int b, int color)
 
 
 #if WITH_ILI9431_FONTS
-	#include <myDebug.h>
+
 
 	static uint32_t fetchbit(const uint8_t *p, uint32_t index)
 	{

@@ -26,8 +26,11 @@
 
 // prh addition WITH_ILI9431_FONTS
 // added ability to use fonts from Paul's ILI9431_t3 library
-
-#define WITH_ILI9431_FONTS   1
+#ifdef __MK66FX1M0__        // prh - teensy mods
+	#define WITH_ILI9431_FONTS   1
+#else
+	#define WITH_ILI9431_FONTS   0
+#endif
 
 #if WITH_ILI9431_FONTS
 	#include <ILI9341_t3.h>
